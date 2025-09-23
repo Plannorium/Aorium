@@ -86,23 +86,23 @@ const Dashboard = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAnalysisResults = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/analytics");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setAnalysisResults(data.results);
-      } catch (error) {
-        console.error("Failed to fetch analysis results:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchAnalysisResults = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/analytics");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      const data = await response.json();
+      setAnalysisResults(data.results);
+    } catch (error) {
+      console.error("Failed to fetch analysis results:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAnalysisResults();
   }, []);
   return (
@@ -247,7 +247,7 @@ const Dashboard = () => {
             </Card>
 
             {/* AI Analysis Results */}
-            <AnalysisResultsWidget results={analysisResults} isLoading={isLoading} />
+            <AnalysisResultsWidget results={analysisResults} isLoading={isLoading} onAnalysisComplete={fetchAnalysisResults} />
 
             {/* Regional Performance */}
             <Card className="p-6" hover={true}>

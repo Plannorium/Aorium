@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Card from "../ui/Card";
 import type { AnalysisResult } from "../../../prisma/generated/client";
 import { AlertTriangle, Info } from "lucide-react";
+import Button from "../ui/Button";
 
 interface AnalysisResultsWidgetProps {
   results: AnalysisResult[];
   isLoading: boolean;
+  onAnalysisComplete: () => void;
 }
 
 const ParsedAnalysisResult: React.FC<{ resultString: string }> = ({
@@ -86,19 +88,52 @@ const ParsedAnalysisResult: React.FC<{ resultString: string }> = ({
 
 export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
   results,
+  isLoading,
+  onAnalysisComplete,
 }) => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch("/api/analytics", { method: "POST" });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      onAnalysisComplete();
+    } catch (error) {
+      console.error("Failed to trigger analysis:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
-    <Card className="p-6" hover={true}>
-      <h3 className="font-montserrat font-semibold text-xl text-gold mb-4">
-        AI Analysis Results
-      </h3>
-      {results.length === 0 ? (
+    <Card
+      className={`p-6 ${
+        !results.length && !isLoading ? "" : "max-h-[60vh]"
+      } overflow-y-scroll scrollbar-webkit scrollbar-firefox`}
+      hover={true}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-montserrat font-semibold text-xl text-gold">
+          AI Analysis Results
+        </h3>
+        <Button onClick={handleAnalyze} disabled={isAnalyzing || isLoading}>
+          {isAnalyzing ? "Analyzing..." : "Run Analysis"}
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gold"></div>
+        </div>
+      ) : results.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-neutral-light/70">
             No AI analysis results available yet.
           </p>
           <p className="text-sm text-neutral-light/50 mt-2">
-            Upload a file to get started.
+            Click "Run Analysis" to get started.
           </p>
         </div>
       ) : (

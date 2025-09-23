@@ -163,6 +163,23 @@ export async function POST(req: Request) {
 
     
 
+    // Broaden accepted types to include common Excel and JSON types
+    const acceptedFileTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "application/octet-stream",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/csv",
+      "application/json",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain",
+    ];
+
     // If file.type is empty (some browsers for local files), attempt to infer from file name
     const fileType =
       file.type || (file.name ? mimeFromFilename(file.name) : "");

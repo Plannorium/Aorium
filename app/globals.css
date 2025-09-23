@@ -80,3 +80,24 @@
     font-family: "Cairo", sans-serif;
   }
 }
+
+/* For Webkit-based browsers (Chrome, Safari and Opera) */
+.scrollbar-webkit::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-webkit::-webkit-scrollbar-track {
+  background: var(--neutral-light);
+}
+
+.scrollbar-webkit::-webkit-scrollbar-thumb {
+  background-color: var(--primary-dark);
+  border-radius: 4.5px;
+  border: 2px solid var(--neutral-light);
+}
+
+/* For Firefox */
+.scrollbar-firefox {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-dark) var(--neutral-light);
+}

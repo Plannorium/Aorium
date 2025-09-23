@@ -60,7 +60,7 @@ model File {
   mime            String?
   size            Int?
   section         String?
-  uploadedAt      DateTime @default(now())
+  uploadedAt      DateTime?
   owner           User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 

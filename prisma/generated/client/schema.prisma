@@ -52,16 +52,16 @@ model Onboarding {
 }
 
 model File {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId    String   @db.ObjectId
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId    String    @db.ObjectId
   filename   String
   url        String
   publicId   String?
   mime       String?
   size       Int?
   section    String?
-  uploadedAt DateTime @default(now())
-  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  uploadedAt DateTime?
+  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 
 model AnalysisResult {
