@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import cloudinaryModule, { UploadApiErrorResponse } from "cloudinary";
 import { jwtVerify } from "jose";
 import { prisma } from "../../lib/prisma";
-import { analyzeData } from "../../lib/aiClient";
+import { safeCallModel } from "../../lib/aiClient";
 
 // Small filename -> mime heuristic for when file.type is empty in the FormData
 function mimeFromFilename(name: string) {
@@ -160,8 +160,6 @@ export async function POST(req: Request) {
         secure: true,
       });
     }
-
-    
 
     // Broaden accepted types to include common Excel and JSON types
     const acceptedFileTypes = [
