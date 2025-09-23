@@ -33,6 +33,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { onboarding: true },
+    });
+
     const results = await prisma.analysisResult.findMany({
       where: {
         userId: userId,
@@ -42,7 +47,35 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({ results });
+    const regionPrompt = `
+    Based on the following business profile, generate a JSON array of objects representing the estimated market potential for a business in the GCC countries.
+    Business Profile:
+    - Business Name: ${user?.onboarding?.businessName || "the company"}
+    - Business Type: ${user?.onboarding?.businessType || "not specified"}
+    - Business Size: ${user?.onboarding?.businessSize || "not specified"}
+    - Region: ${user?.onboarding?.region || "not specified"}
+    - Key Goals: ${user?.onboarding?.goals.join(", ") || "not specified"}
+
+    The JSON array should represent regional performance for GCC countries.
+    Each object should have a "name" (the country name) and a "value" (a number between 100 and 500 representing market potential score).
+    The countries are: Saudi Arabia, UAE, Qatar, Kuwait, Oman, Bahrain.
+    The output should be only the JSON array.
+  `;
+
+    const regionCompletion: { model: string; content: string } | null =
+      await safeCallModel([{ role: "user", content: regionPrompt }]);
+
+    let regionData = [];
+    if (regionCompletion && regionCompletion.content) {
+      try {
+        regionData = JSON.parse(regionCompletion.content);
+      } catch (e) {
+        console.error("Failed to parse region data from model:", e);
+        regionData = [];
+      }
+    }
+
+    return NextResponse.json({ results, user, regionData });
   } catch (error) {
     console.error("API Analytics GET Error:", error);
     return NextResponse.json(
@@ -61,6 +94,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    const fileCount = await prisma.file.count({
+      where: {
+        ownerId: userId,
+        section: "historicalPerformance",
+      },
+    });
+
     const files = await prisma.file.findMany({
       where: {
         ownerId: userId,
@@ -69,7 +109,7 @@ export async function POST(req: Request) {
       orderBy: {
         uploadedAt: "desc",
       },
-      take: 3,
+      ...(fileCount > 1 && { take: 2 }),
     });
 
     if (files.length === 0) {

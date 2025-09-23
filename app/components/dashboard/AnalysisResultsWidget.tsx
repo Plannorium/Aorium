@@ -3,11 +3,14 @@ import Card from "../ui/Card";
 import type { AnalysisResult } from "../../../prisma/generated/client";
 import { AlertTriangle, Info } from "lucide-react";
 import Button from "../ui/Button";
+import { FileUploadWidget } from "./FileUploadWidget";
 
 interface AnalysisResultsWidgetProps {
   results: AnalysisResult[];
   isLoading: boolean;
   onAnalysisComplete: () => void;
+  files: any[];
+  onUploadComplete: () => void;
 }
 
 const ParsedAnalysisResult: React.FC<{ resultString: string }> = ({
@@ -90,19 +93,27 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
   results,
   isLoading,
   onAnalysisComplete,
+  files,
+  onUploadComplete,
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
+    setAnalysisError(null);
     try {
       const response = await fetch("/api/analytics", { method: "POST" });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
       }
       onAnalysisComplete();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to trigger analysis:", error);
+      setAnalysisError(error.message);
     } finally {
       setIsAnalyzing(false);
     }
@@ -123,19 +134,28 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
           {isAnalyzing ? "Analyzing..." : "Run Analysis"}
         </Button>
       </div>
+      {analysisError && (
+        <div className="bg-red-900/20 border border-red-500/30 text-red-400 p-3 rounded-lg mb-4">
+          {analysisError}
+        </div>
+      )}
       {isLoading ? (
         <div className="flex justify-center items-center py-8">
           <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-gold"></div>
         </div>
       ) : results.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-neutral-light/70">
-            No AI analysis results available yet.
-          </p>
-          <p className="text-sm text-neutral-light/50 mt-2">
-            Click "Run Analysis" to get started.
-          </p>
-        </div>
+        files.length > 0 ? (
+          <div className="text-center py-8">
+            <p className="text-neutral-light/70">
+              You have uploaded data. Ready to run analysis.
+            </p>
+            <p className="text-sm text-neutral-light/50 mt-2">
+              Click &quot;Run Analysis&quot; to get started.
+            </p>
+          </div>
+        ) : (
+          <FileUploadWidget onUploadComplete={onUploadComplete} />
+        )
       ) : (
         <div className="space-y-6">
           {results.map((result) => (

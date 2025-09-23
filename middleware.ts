@@ -20,8 +20,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    // If no token, redirect to login page for protected routes
-    return NextResponse.redirect(new URL("/auth/login", request.url));
+    if (pathname !== "/") {
+      // If no token and not the home page, redirect to login page for protected routes
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
   }
 
   // if we are on the onboarding page, we don't need to check for onboarding status

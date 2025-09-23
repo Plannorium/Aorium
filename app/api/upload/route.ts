@@ -286,18 +286,24 @@ export async function POST(req: Request) {
           fileContentForAnalysis = buffer.toString("utf-8");
         }
 
-        const analysisContext = {
-          prompt: `Analyze the content of the file named '${response.original_filename}'. Provide insights relevant to business strategy in the GCC region.`,
-          content: fileContentForAnalysis,
-          fileInfo: {
-            name: response.original_filename,
-            size: response.size,
-            type: fileType,
-            url: response.url,
-          },
-        };
+        if (fileContentForAnalysis) {
+          const messages = [
+            {
+              role: "user",
+              content: `Analyze the content of the file named '${
+                response.original_filename || file.name
+              }'. Provide insights relevant to business strategy in the GCC region. The file content is below:\n\n${fileContentForAnalysis}`,
+            },
+          ];
 
-        analysisResult = await analyzeData("file-analysis", analysisContext);
+          const analysisResultObj = await safeCallModel(messages);
+          const content = analysisResultObj?.content;
+
+          if (content) {
+            analysisResult =
+              typeof content === "string" ? content : JSON.stringify(content);
+          }
+        }
 
         if (analysisResult) {
           await prisma.analysisResult.create({

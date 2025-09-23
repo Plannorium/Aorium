@@ -24,67 +24,15 @@ import {
   UserIcon,
 } from "lucide-react";
 
-// Sample data
-const marketTrendData = [
-  {
-    name: "Jan",
-    value: 400,
-  },
-  {
-    name: "Feb",
-    value: 300,
-  },
-  {
-    name: "Mar",
-    value: 500,
-  },
-  {
-    name: "Apr",
-    value: 280,
-  },
-  {
-    name: "May",
-    value: 590,
-  },
-  {
-    name: "Jun",
-    value: 800,
-  },
-  {
-    name: "Jul",
-    value: 810,
-  },
-];
-const regionData = [
-  {
-    name: "UAE",
-    value: 400,
-  },
-  {
-    name: "KSA",
-    value: 650,
-  },
-  {
-    name: "Qatar",
-    value: 300,
-  },
-  {
-    name: "Kuwait",
-    value: 280,
-  },
-  {
-    name: "Bahrain",
-    value: 180,
-  },
-  {
-    name: "Oman",
-    value: 220,
-  },
-];
 const Dashboard = () => {
   const [timeframe, setTimeframe] = useState("week");
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [files, setFiles] = useState<any[]>([]);
+  const [filesLoading, setFilesLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [marketTrendData, setMarketTrendData] = useState<any[]>([]);
+  const [regionData, setRegionData] = useState<any[]>([]);
 
   const fetchAnalysisResults = async () => {
     setIsLoading(true);
@@ -95,6 +43,8 @@ const Dashboard = () => {
       }
       const data = await response.json();
       setAnalysisResults(data.results);
+      setUser(data.user);
+      setRegionData(data.regionData);
     } catch (error) {
       console.error("Failed to fetch analysis results:", error);
     } finally {
@@ -102,9 +52,37 @@ const Dashboard = () => {
     }
   };
 
+  const fetchFiles = async () => {
+    setFilesLoading(true);
+    try {
+      const response = await fetch("/api/upload");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setFiles(data.files);
+    } catch (error) {
+      console.error("Failed to fetch files:", error);
+    } finally {
+      setFilesLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAnalysisResults();
+    fetchFiles();
   }, []);
+
+  useEffect(() => {
+    if (user && user.onboarding) {
+      const goals = user.onboarding.goals || [];
+      const newMarketTrendData = goals.map((goal: string, index: number) => ({
+        name: goal,
+        value: (index + 1) * 100,
+      }));
+      setMarketTrendData(newMarketTrendData);
+    }
+  }, [user]);
   return (
     <div className="min-h-screen bg-primary-dark py-8">
       <div className="container mx-auto px-4">
@@ -247,7 +225,13 @@ const Dashboard = () => {
             </Card>
 
             {/* AI Analysis Results */}
-            <AnalysisResultsWidget results={analysisResults} isLoading={isLoading} onAnalysisComplete={fetchAnalysisResults} />
+            <AnalysisResultsWidget
+              results={analysisResults}
+              isLoading={isLoading || filesLoading}
+              onAnalysisComplete={fetchAnalysisResults}
+              files={files}
+              onUploadComplete={fetchFiles}
+            />
 
             {/* Regional Performance */}
             <Card className="p-6" hover={true}>

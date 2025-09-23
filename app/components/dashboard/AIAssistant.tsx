@@ -33,30 +33,46 @@ const AIAssistant = () => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
-    // Add user message
+
     const newUserMessage: Message = {
       id: messages.length + 1,
       text: inputText,
       isUser: true,
       timestamp: new Date(),
     };
-    setMessages([...messages, newUserMessage]);
+    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setInputText("");
-    // Show typing indicator
     setIsTyping(true);
-    // Simulate AI response
-    setTimeout(() => {
-      setIsTyping(false);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: inputText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
       const aiResponse: Message = {
         id: messages.length + 2,
-        text: "I've analyzed your request. Based on your current data, I recommend focusing on market segment A which shows 23% growth potential. Would you like me to generate a detailed report?",
+        text: data.reply,
         isUser: false,
         timestamp: new Date(),
       };
       setMessages((prevMessages) => [...prevMessages, aiResponse]);
-    }, 1500);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setIsTyping(false);
+    }
   };
   return (
     <Card className="flex flex-col h-full" variant="highlight">
