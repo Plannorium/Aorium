@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  email           String           @unique
+  password        String
+  profilePicture  String?
+  name            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sessions        Session[]
+  onboarding      Onboarding?
+  files           File[]
+  analysisResults AnalysisResult[]
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Onboarding {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String   @unique @db.ObjectId
+  user               User     @relation(fields: [userId], references: [id])
+  step               Int      @default(1)
+  completed          Boolean  @default(false)
+  businessName       String?
+  businessType       String?
+  businessSize       String?
+  region             String?
+  goals              String[] @default([])
+  uploadedFiles      Json[]   @default([])
+  competitors        String?
+  targetAudience     String?
+  industryChallenges String?
+  contentFocus       String[] @default([])
+  preferredPlatforms String[] @default([])
+  contentKPIs        String[] @default([])
+}
+
+model File {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId    String   @db.ObjectId
+  filename   String
+  url        String
+  publicId   String?
+  mime       String?
+  size       Int?
+  section    String?
+  uploadedAt DateTime @default(now())
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model AnalysisResult {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  task      String
+  result    String
+  context   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

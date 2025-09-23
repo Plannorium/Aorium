@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@property --start {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@layer utilities {
+  .card-border {
+    border: 1px solid transparent;
+    background-image: conic-gradient(
+      from var(--start),
+      transparent,
+      #d4af37,
+      transparent
+    );
+    background-origin: border-box;
+    background-clip: border-box;
+  }
+
+  .hide-cursor {
+    cursor: none;
+  }
+}
+
+@layer base {
+  :root {
+    /* Light theme */
+    --primary-dark: #5daa9a;
+    --primary-DEFAULT: #5daa9a;
+    --gold-DEFAULT: #f9d477;
+    --neutral-light: #333333;
+    --secondary-DEFAULT: #a8c5dd;
+    --text-dark: #1f2937;
+    --background: #ffffff;
+    --foreground: #1f2937;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary-dark: #071a3a;
+      --primary-DEFAULT: #071a3a;
+      --gold-DEFAULT: #d4af37;
+      --neutral-light: #f3e9dc;
+      --secondary-DEFAULT: #90b1d3;
+      --text-dark: #f3e9dc;
+      --background: #071a3a;
+      --foreground: #f3e9dc;
+    }
+  }
+
+  @keyframes gradient-move {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
+    background-size: 200% 200%;
+    animation: gradient-move 3s linear infinite;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Inter", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Cairo", sans-serif;
+  }
+}
