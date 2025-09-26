@@ -48,9 +48,9 @@ const OnboardingLayout = ({ children, currentStep }: OnboardingLayoutProps) => {
       <div className="container mx-auto px-4 py-8">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center">
+          <Link href="/home" className="flex items-center">
             <img src="/Aorium.png" alt="Aorium Logo" className="h-12 w-auto" />
-            <span className="ml-2 text-gold font-montserrat font-semibold text-2xl">
+            <span className="ml-2 text-[#D4AF37] font-montserrat font-semibold text-2xl">
               AORIUM
             </span>
           </Link>
@@ -72,7 +72,7 @@ const OnboardingLayout = ({ children, currentStep }: OnboardingLayoutProps) => {
                       <div className="group">
                         <span className="flex items-center">
                           <span className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-primary-dark">
-                            <CheckIcon className="h-6 w-6 text-gold" />
+                            <CheckIcon className="h-6 w-6 text-[#D4AF37]" />
                           </span>
                           <span className="ml-3 text-base font-semibold text-white">
                             {step.name.length > 9
@@ -89,7 +89,9 @@ const OnboardingLayout = ({ children, currentStep }: OnboardingLayoutProps) => {
                       <div className="group" aria-current="step">
                         <span className="flex items-center">
                           <span className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full border-2 border-gold-light">
-                            <span className="text-gold-light">{index + 1}</span>
+                            <span className="text-[#D4AF37]-light">
+                              {index + 1}
+                            </span>
                           </span>
                           <span className="ml-3 text-base font-semibold text-white">
                             {step.name.length > 9
@@ -131,7 +133,7 @@ const OnboardingLayout = ({ children, currentStep }: OnboardingLayoutProps) => {
         {/* Mobile Progress Indicator */}
         <div className="md:hidden mb-8">
           <div className="flex justify-between items-center">
-            <span className="text-gold font-medium">
+            <span className="text-[#D4AF37] font-medium">
               Step {currentStep + 1} of {steps.length}
             </span>
             <span className="text-neutral-light/70">

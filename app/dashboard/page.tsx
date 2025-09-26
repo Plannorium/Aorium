@@ -93,9 +93,9 @@ const Dashboard = () => {
               <h1 className="text-3xl font-montserrat font-bold text-neutral-light">
                 Analytics Dashboard
               </h1>
-              <span className="ml-3 px-2 py-0.5 text-xs bg-gold/20 text-[#D4AF37] rounded-md">
+              {/* <span className="ml-3 px-2 py-0.5 text-xs bg-gold/20 text-[#D4AF37] rounded-md">
                 PRO
-              </span>
+              </span> */}
             </div>
             <p className="text-neutral-light/70">
               Welcome back! Here&apos;s your latest insights overview.
@@ -112,44 +112,60 @@ const Dashboard = () => {
               >
                 <SettingsIcon size={20} />
               </button>
-            </div>
-          </div>
-        </div>
-        {/* Dashboard Controls */}
-        <div className="flex flex-col md:flex-row justify-end items-start md:items-center mb-8">
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center p-2"
-              onClick={() => {
-                fetchAnalysisResults();
-                fetchFiles();
-              }}
-            >
-              <RefreshCwIcon size={16} />
-            </Button>
-          </div>
-        </div>
-        {/* Benchmarking Widget */}
-        <Card className="p-6 mb-5" hover={true}>
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="font-montserrat font-semibold text-xl text-gold">
-                Benchmarking
-              </h3>
-              <p className="text-sm text-neutral-light/60 mt-1">
-                Compare your performance against industry benchmarks and
-                competitors.
-              </p>
-            </div>
-            <Link href="/dashboard/analytics/benchmarking">
-              <Button variant="outline" size="sm">
-                Go to Benchmarking
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center p-2 cursor-pointer"
+                onClick={() => {
+                  fetchAnalysisResults();
+                  fetchFiles();
+                }}
+              >
+                <RefreshCwIcon size={16} />
               </Button>
-            </Link>
+            </div>
           </div>
-        </Card>
+          {/* </div> */}
+        </div>
+        {/* Benchmarking and Social Performance Widgets */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+          <Card className="p-6" hover={true}>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
+                  Benchmarking
+                </h3>
+                <p className="text-sm text-neutral-light/60 mt-1">
+                  Compare your performance against industry benchmarks and
+                  competitors.
+                </p>
+              </div>
+              <Link href="/dashboard/analytics/benchmarking">
+                <Button className="cursor-pointer" variant="outline" size="sm">
+                  Benchmarking
+                </Button>
+              </Link>
+            </div>
+          </Card>
+          {/* Social Performance Widget */}
+          <Card className="p-6" hover={true}>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
+                  Social Performance
+                </h3>
+                <p className="text-sm text-neutral-light/60 mt-1">
+                  Track your social media performance metrics.
+                </p>
+              </div>
+              <Link href="/dashboard/social-performance">
+                <Button className="cursor-pointer" variant="outline" size="sm">
+                  View Social Performance
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
         {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Charts - 2/3 width */}
@@ -158,7 +174,7 @@ const Dashboard = () => {
             <Card className="p-6" hover={true}>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                  <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
                     Market Trends
                   </h3>
                   <p className="text-sm text-neutral-light/60 mt-1">
@@ -172,7 +188,7 @@ const Dashboard = () => {
                       onClick={() => setTimeframe(option)}
                       className={`px-3 py-1 text-sm rounded-md transition-colors ${
                         timeframe === option
-                          ? "bg-gold/20 text-gold"
+                          ? "bg-gold/20 text-[#D4AF37]"
                           : "text-neutral-light/70 hover:text-neutral-light"
                       }`}
                     >
@@ -188,14 +204,14 @@ const Dashboard = () => {
             <Card className="p-6" hover={true}>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                  <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
                     Regional Performance
                   </h3>
                   <p className="text-sm text-neutral-light/60 mt-1">
                     Compare performance across GCC countries
                   </p>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button className="cursor-pointer" variant="outline" size="sm">
                   Explore Regions
                 </Button>
               </div>
@@ -216,7 +232,7 @@ const Dashboard = () => {
             <Card className="p-6" hover={true}>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                  <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
                     Market News
                   </h3>
                   <p className="text-sm text-neutral-light/60 mt-1">
@@ -224,7 +240,11 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <Link href="/dashboard/analytics/market-news">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    className="cursor-pointer"
+                    variant="outline"
+                    size="sm"
+                  >
                     Read News
                   </Button>
                 </Link>
@@ -233,7 +253,7 @@ const Dashboard = () => {
             <Card className="p-6" hover={true}>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                  <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
                     Analysis Results
                   </h3>
                   <p className="text-sm text-neutral-light/60 mt-1">
@@ -241,7 +261,11 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <Link href="/dashboard/analytics/analysis-results">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    className="cursor-pointer"
+                    variant="outline"
+                    size="sm"
+                  >
                     View Results
                   </Button>
                 </Link>

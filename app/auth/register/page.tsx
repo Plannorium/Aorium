@@ -126,6 +126,13 @@ const RegisterPage = () => {
                 </p>
               )}
 
+              <p className="text-xs text-neutral-light/60 text-center mb-4">
+                By signing up, you agree to our{" "}
+                <a href="/terms" className="text-[#D4AF37] hover:underline">
+                  Terms and Services
+                </a>
+                .
+              </p>
               <div>
                 <motion.button
                   whileHover={{ scale: 1.02 }}

@@ -1,4 +1,3 @@
-// import { getUser } from "../api/user/route";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { getUser } from "../lib/user";
@@ -6,14 +5,14 @@ import { redirect } from "next/navigation";
 
 export default async function UserProfile() {
   const { user } = await getUser();
-  if(!user){
-    redirect("/auth/login")
+  if (!user) {
+    redirect("/auth/login");
   }
   console.log(user, "user");
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-gold mb-8">User Profile</h1>
+      <h1 className="text-3xl font-bold text-[#D4AF37] mb-8">User Profile</h1>
 
       <Card className="p-6 mb-6">
         <div className="flex items-start space-x-6">

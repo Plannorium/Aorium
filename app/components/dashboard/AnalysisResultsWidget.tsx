@@ -32,7 +32,9 @@ const ParsedAnalysisResult: React.FC<{ resultString: string }> = ({
     const { analysis } = parsedResult;
     return (
       <div className="prose prose-invert max-w-none">
-        <h4 className="text-lg font-semibold text-gold">{analysis.title}</h4>
+        <h4 className="text-lg font-semibold text-[#D4AF37]">
+          {analysis.title}
+        </h4>
         <p className="text-neutral-light/80">{analysis.summary}</p>
         {analysis.sections &&
           analysis.sections.map((section: any, index: number) => (
@@ -122,7 +124,7 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
   return (
     <Card className={`p-6 `} hover={true}>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-montserrat font-semibold text-xl text-gold">
+        <h3 className="font-montserrat font-semibold text-xl text-[#D4AF37]">
           AI Analysis Results
         </h3>
         <Button onClick={handleAnalyze} disabled={isAnalyzing || isLoading}>
@@ -160,7 +162,7 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
           {results.map((result) => (
             <div key={result.id} className="bg-white/5 p-4 rounded-lg">
               <div className="flex justify-between items-center mb-3">
-                <p className="text-neutral-light text-sm font-semibold capitalize bg-gold/10 text-gold px-2 py-1 rounded">
+                <p className="text-neutral-light text-sm font-semibold capitalize bg-gold/10 text-[#D4AF37] px-2 py-1 rounded">
                   {result.task.replace(/-/g, " ")}
                 </p>
                 <p className="text-neutral-light/50 text-xs">

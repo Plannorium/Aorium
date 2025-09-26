@@ -18,12 +18,12 @@ export async function GET(req: NextRequest) {
     const response = NextResponse.redirect(url);
 
     response.cookies.set("twitter_code_verifier", codeVerifier, {
-      path: "/",
+      path: "/home",
       httpOnly: true,
       maxAge: 60 * 10, // 10 minutes
     });
     response.cookies.set("twitter_state", state, {
-      path: "/",
+      path: "/home",
       httpOnly: true,
       maxAge: 60 * 10, // 10 minutes
     });

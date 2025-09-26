@@ -157,14 +157,14 @@ const BusinessTypeScreen = ({
   };
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-gold mb-6">
+      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-[#D4AF37] mb-6">
         Tell us about your business
       </h1>
       <div className="space-y-8">
         {currentQuestion === 0 && (
           <div>
             <div className="flex items-center mb-4">
-              <BuildingIcon size={20} className="text-gold mr-2" />
+              <BuildingIcon size={20} className="text-[#D4AF37] mr-2" />
               <h2 className="text-xl font-montserrat font-medium text-neutral-light">
                 Business Type
               </h2>
@@ -206,7 +206,7 @@ const BusinessTypeScreen = ({
         {currentQuestion === 1 && (
           <div>
             <div className="flex items-center mb-4">
-              <UsersIcon size={20} className="text-gold mr-2" />
+              <UsersIcon size={20} className="text-[#D4AF37] mr-2" />
               <h2 className="text-xl font-montserrat font-medium text-neutral-light">
                 Business Size
               </h2>
@@ -248,7 +248,7 @@ const BusinessTypeScreen = ({
         {currentQuestion === 2 && (
           <div>
             <div className="flex items-center mb-4">
-              <MapPinIcon size={20} className="text-gold mr-2" />
+              <MapPinIcon size={20} className="text-[#D4AF37] mr-2" />
               <h2 className="text-xl font-montserrat font-medium text-neutral-light">
                 Primary Region
               </h2>

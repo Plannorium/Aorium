@@ -49,7 +49,7 @@ const BusinessContextScreen: React.FC<BusinessContextScreenProps> = ({
 
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-gold mb-6">
+      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-[#D4AF37] mb-6">
         Tell us more about your business context
       </h1>
       <div className="space-y-6">

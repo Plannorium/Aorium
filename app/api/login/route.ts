@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { SignJWT } from "jose";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
@@ -34,9 +34,13 @@ export async function POST(req: Request) {
     }
 
     // Generate JWT
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const alg = "HS256";
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const token = await new SignJWT({ userId: user.id, email: user.email })
+      .setProtectedHeader({ alg })
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(secret);
 
     (await cookies()).set("jwt_token", token, {
       httpOnly: true,

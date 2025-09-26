@@ -256,7 +256,7 @@ const PreviewScreen = ({
                   key={goalId}
                   className="flex items-center p-2 bg-neutral-dark/50 rounded-md"
                 >
-                  <CheckIcon size={20} className="text-gold mr-3" />
+                  <CheckIcon size={20} className="text-[#D4AF37] mr-3" />
                   <span className="text-neutral-light text-lg">
                     {goalLabels[goalId] || "Unknown Goal"}
                   </span>
@@ -270,7 +270,7 @@ const PreviewScreen = ({
         {/* Uploaded Files */}
         <Card className="p-8 bg-neutral-dark border border-gold/20 rounded-xl shadow-lg">
           <div className="flex items-center mb-6 border-b border-[#FFD700]/30 pb-3">
-            <FileIcon size={24} className="text-gold mr-3" />
+            <FileIcon size={24} className="text-[#D4AF37] mr-3" />
             <h2 className="text-2xl font-montserrat font-semibold text-[#FFD700]">
               Uploaded Data Files
             </h2>
@@ -295,10 +295,10 @@ const PreviewScreen = ({
       <div className="bg-gold/10 border border-gold/20 rounded-lg p-4 mb-8">
         <div className="flex">
           <div className="flex-shrink-0 mt-1">
-            <CheckIcon size={20} className="text-gold" />
+            <CheckIcon size={20} className="text-[#D4AF37]" />
           </div>
           <div className="ml-3">
-            <h3 className="text-gold font-medium">Ready to go!</h3>
+            <h3 className="text-[#D4AF37] font-medium">Ready to go!</h3>
             <p className="text-neutral-light text-sm mt-1">
               Your personalized AI dashboard is ready to be generated. Click
               &lsquo;Complete Setup&lsquo; to finalize your account and access

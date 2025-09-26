@@ -1,10 +1,11 @@
 "use client";
 
-import HeroSection from "./components/sections/HeroSection";
-import PricingSection from "./components/sections/PricingSection";
-import FeaturesSection from "./components/sections/FeaturesSection";
+import HeroSection from "../components/sections/HeroSection";
+import PricingSection from "../components/sections/PricingSection";
+import FeaturesSection from "../components/sections/FeaturesSection";
 import React, { useRef } from "react";
-import CTASection from "./components/sections/CTASection";
+import CTASection from "../components/sections/CTASection";
+import Link from "next/link";
 
 const Page = () => {
   const ctaCardRef = useRef<HTMLDivElement>(null);
@@ -51,8 +52,13 @@ const Page = () => {
                   AORIUM
                 </span>
               </div>
-              <div className="text-white/60 text-sm">
-                © {new Date().getFullYear()} Aorium. All rights reserved.
+              <div className="flex items-center space-x-4 text-white/60 text-sm">
+                <Link href="/terms" className="hover:underline">
+                  Terms and Services
+                </Link>
+                <span>
+                  © {new Date().getFullYear()} Aorium. All rights reserved.
+                </span>
               </div>
             </div>
           </div>

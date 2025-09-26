@@ -150,6 +150,13 @@ const LoginPage = () => {
                   Sign up
                 </a>
               </p>
+              <p className="text-sm text-slate-500 mt-2">
+                By signing in, you agree to our{" "}
+                <a href="/terms" className="font-medium text-[#D4AF37] hover:underline">
+                  Terms and Services
+                </a>
+                .
+              </p>
             </div>
           </div>
         </div>

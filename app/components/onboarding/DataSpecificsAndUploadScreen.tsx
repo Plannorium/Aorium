@@ -191,7 +191,7 @@ const DataSpecificsAndUploadScreen: React.FC<
 
   return (
     <div>
-      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-gold mb-6">
+      <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-[#D4AF37] mb-6">
         Data Specifics & Upload
       </h1>
       <div className="space-y-8">
@@ -209,7 +209,7 @@ const DataSpecificsAndUploadScreen: React.FC<
               <UploadCloudIcon className="mx-auto h-12 w-12 text-neutral-light" />
               <p className="mt-4 text-sm text-neutral-light">
                 <span className="font-semibold">Drag and drop</span> files here,
-                or <span className="text-gold">click to browse</span>
+                or <span className="text-[#D4AF37]">click to browse</span>
               </p>
               <p className="text-xs leading-5 text-neutral-light mt-1">
                 Up to 3 files (PDF, Excel, CSV)
@@ -248,7 +248,7 @@ const DataSpecificsAndUploadScreen: React.FC<
               <UploadCloudIcon className="mx-auto h-12 w-12 text-neutral-light" />
               <p className="mt-4 text-sm text-neutral-light">
                 <span className="font-semibold">Drag and drop</span> files here,
-                or <span className="text-gold">click to browse</span>
+                or <span className="text-[#D4AF37]">click to browse</span>
               </p>
               <p className="text-xs leading-5 text-neutral-light mt-1">
                 Up to 3 files (PDF, Excel, CSV)
@@ -288,7 +288,7 @@ const DataSpecificsAndUploadScreen: React.FC<
               <UploadCloudIcon className="mx-auto h-12 w-12 text-neutral-light" />
               <p className="mt-4 text-sm text-neutral-light">
                 <span className="font-semibold">Drag and drop</span> files here,
-                or <span className="text-gold">click to browse</span>
+                or <span className="text-[#D4AF37]">click to browse</span>
               </p>
               <p className="text-xs leading-5 text-neutral-light mt-1">
                 Up to 5 files (PDF, Excel, CSV)

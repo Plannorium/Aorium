@@ -91,8 +91,8 @@ const GoalSelectionScreen = ({
   return (
     <div>
       <div className="flex items-center mb-6">
-        <TargetIcon size={24} className="text-gold mr-3" />
-        <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-gold">
+        <TargetIcon size={24} className="text-[#D4AF37] mr-3" />
+        <h1 className="text-2xl md:text-3xl font-montserrat font-semibold text-[#D4AF37]">
           Select Your Business Goals
         </h1>
       </div>
@@ -127,7 +127,7 @@ const GoalSelectionScreen = ({
                 <h3
                   className={`font-medium ${
                     selectedGoals.includes(goal.id)
-                      ? "text-gold"
+                      ? "text-[#D4AF37]"
                       : "text-neutral-light"
                   }`}
                 >
@@ -148,7 +148,9 @@ const GoalSelectionScreen = ({
       )}
       <div className="flex items-center justify-between">
         <div className="text-sm text-neutral-light/70">
-          <span className="text-gold font-medium">{selectedGoals.length}</span>{" "}
+          <span className="text-[#D4AF37] font-medium">
+            {selectedGoals.length}
+          </span>{" "}
           of {goals.length} goals selected
         </div>
         <div className="flex space-x-4">

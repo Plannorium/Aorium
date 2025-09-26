@@ -13,7 +13,6 @@ import Button from "../ui/Button";
 import Input from "../ui/input";
 import { mockBrandData } from "../../data/mockBenchmarkingData";
 import BenchmarkingCharts from "./BenchmarkingCharts";
-import ConnectAccountModal from "./ConnectAccountModal";
 import Spinner from "../ui/Spinner";
 import ExportDropdown from "./ExportDropdown";
 import jsPDF from "jspdf";
@@ -27,7 +26,6 @@ const BenchmarkingWidget = () => {
   const [compareBrandB, setCompareBrandB] = useState("");
   const [analysisResults, setAnalysisResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [suggestedCompetitors, setSuggestedCompetitors] = useState<string[]>(
     []
   );
@@ -85,17 +83,6 @@ const BenchmarkingWidget = () => {
 
   const handleRemoveCompetitor = (competitorToRemove: string) => {
     setCompetitors(competitors.filter((c) => c !== competitorToRemove));
-  };
-
-  const handleConnectTwitter = async () => {
-    try {
-      const res = await fetch("/api/twitter?username=TwitterDev");
-      const data = await res.json();
-      console.log("Twitter data:", data);
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error fetching Twitter data:", error);
-    }
   };
 
   const handleCompare = async () => {
@@ -257,13 +244,6 @@ const BenchmarkingWidget = () => {
         </div>
         <div className="flex gap-2">
           <ExportDropdown onExport={handleExport} />
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Connect Accounts
-          </Button>
         </div>
       </div>
 
@@ -375,12 +355,6 @@ const BenchmarkingWidget = () => {
         </div>
       )}
       {analysisResults && <BenchmarkingCharts brands={analysisResults} />}
-
-      <ConnectAccountModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConnectTwitter={handleConnectTwitter}
-      />
     </div>
   );
 };

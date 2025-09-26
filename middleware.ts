@@ -20,10 +20,18 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    if (pathname !== "/") {
-      // If no token and not the home page, redirect to login page for protected routes
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+    if (pathname === "/home") {
+      return NextResponse.next();
     }
+    return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+
+  try {
+    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+  } catch (err) {
+    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    response.cookies.delete("jwt_token");
+    return response;
   }
 
   // if we are on the onboarding page, we don't need to check for onboarding status

@@ -25,7 +25,7 @@ const Header = () => {
       });
       setIsLoggedIn(false);
       setIsProfileOpen(false);
-      router.push("/");
+      router.push("/home");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -88,10 +88,10 @@ const Header = () => {
 
   // Shared link definitions to avoid duplication between desktop and mobile
   const navLinks = [
-    { label: "Home", href: "/" },
+    { label: "Home", href: "/home" },
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Features", href: "/features" },
+    { label: "Pricing", href: "/pricing" },
   ];
 
   // Only profile link for mobile auth area; main nav contains dashboard already
@@ -111,7 +111,7 @@ const Header = () => {
       >
         <div className="container mx-auto px-4 py-4 flex justify-center items-center">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center group">
+            <Link href="/home" className="flex items-center group">
               <img
                 src="/Aorium.png"
                 alt="Aorium Logo"
@@ -137,7 +137,7 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Link href="/" className="flex items-center group">
+          <Link href="/home" className="flex items-center group">
             <img
               src="/Aorium.png"
               alt="Aorium Logo"
@@ -155,7 +155,7 @@ const Header = () => {
               key={link.href}
               href={link.href}
               className={`text-neutral-light hover:text-[#D4AF37] transition-colors relative py-1 ${
-                isActive(link.href) ? "text-gold" : ""
+                isActive(link.href) ? "text-[#D4AF37]" : ""
               }`}
             >
               {link.label}
@@ -240,7 +240,7 @@ const Header = () => {
               key={link.href}
               href={link.href}
               className={`text-neutral-light hover:text-[#D4AF37] transition-colors py-2 ${
-                isActive(link.href) ? "text-gold" : ""
+                isActive(link.href) ? "text-[#D4AF37]" : ""
               }`}
               onClick={toggleMenu}
             >

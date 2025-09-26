@@ -3,6 +3,7 @@
 import React from "react";
 import { X, Twitter, Facebook, Linkedin } from "lucide-react";
 import Button from "../ui/Button";
+import Link from "next/link";
 
 interface ConnectAccountModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ const ConnectAccountModal: React.FC<ConnectAccountModalProps> = ({
             onClick={() => (window.location.href = "/api/twitter/auth")}
           >
             <div className="flex items-center">
-              <Twitter size={24} className="mr-4 text-gold" />
+              <Twitter size={24} className="mr-4 text-[#D4AF37]" />
               <div>
                 <h3 className="font-semibold text-text-dark">
                   Connect Twitter
@@ -84,7 +85,10 @@ const ConnectAccountModal: React.FC<ConnectAccountModalProps> = ({
           </div>
         </div>
         <p className="text-xs text-gray-400 mt-6 text-center">
-          By connecting your accounts, you agree to our Terms of Service.
+          By connecting your accounts, you agree to our{" "}
+          <Link href="/terms" className="text-[#D4AF37] hover:underline">
+            Terms of Service
+          </Link>
         </p>
       </div>
     </div>

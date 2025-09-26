@@ -172,17 +172,17 @@ const AIAssistant = () => {
       }`}
       variant="highlight"
     >
-      <div className="p-4 border-b border-gold/20 flex items-center justify-between">
+      <div className="p-4 border-b border-[rgba(212,175,55,0.2)] flex items-center justify-between">
         <div className="flex items-center">
-          <div className="p-1.5 rounded-full bg-gold/10 text-[#D4AF37] mr-3">
+          <div className="p-1.5 rounded-full bg-[rgba(212,175,55,0.1)] text-[#D4AF37] mr-3">
             <BotIcon size={18} />
           </div>
-          <h3 className="font-montserrat font-semibold text-gold">
+          <h3 className="font-montserrat font-semibold text-[#d4af37]">
             AI Assistant
           </h3>
         </div>
         <div className="flex items-center">
-          <span className="text-xs px-2 py-0.5 bg-gold/20 text-[#D4AF37] rounded-full">
+          <span className="text-xs px-2 py-0.5 bg-[rgba(212,175,55,0.2)] text-[#D4AF37] rounded-full">
             Online
           </span>
           <button
@@ -208,8 +208,8 @@ const AIAssistant = () => {
             <div
               className={`max-w-[80%] rounded-lg p-3 shadow-md ${
                 message.isUser
-                  ? "bg-gold/20 text-neutral-light rounded-tr-none"
-                  : "bg-secondary/20 text-neutral-light rounded-tl-none"
+                  ? "bg-[rgba(212,175,55,0.2)] text-[#f3e9dc] rounded-tr-none"
+                  : "bg-[rgba(144,177,211,0.2)] text-[#f3e9dc] rounded-tl-none"
               }`}
             >
               {message.isUser ? (
@@ -220,7 +220,7 @@ const AIAssistant = () => {
                 <p className="whitespace-pre-wrap">{message.text}</p>
               )}
               {message.fileName && (
-                <div className="text-xs opacity-80 mt-2 p-2 bg-black/20 rounded-md">
+                <div className="text-xs opacity-80 mt-2 p-2 bg-[rgba(0,0,0,0.2)] rounded-md">
                   Attached file: {message.fileName}
                 </div>
               )}
@@ -237,46 +237,15 @@ const AIAssistant = () => {
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div
-              className="max-w-[80%] rounded-lg p-3 shadow-md rounded-tl-none"
-              style={{ backgroundColor: "rgba(10, 24, 51, 0.2)" }}
-            >
+            <div className="max-w-[80%] rounded-lg p-3 shadow-md rounded-tl-none bg-[rgba(144,177,211,0.2)]">
               <div className="flex items-center space-x-1.5">
-                <div
-                  className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{
-                    backgroundColor: "rgba(229, 229, 229, 0.7)",
-                    animationDelay: "0ms",
-                  }}
-                ></div>
-                <div
-                  className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{
-                    backgroundColor: "rgba(229, 229, 229, 0.7)",
-                    animationDelay: "150ms",
-                  }}
-                ></div>
-                <div
-                  className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{
-                    backgroundColor: "rgba(229, 229, 229, 0.7)",
-                    animationDelay: "300ms",
-                  }}
-                ></div>
-                <div
-                  className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{
-                    backgroundColor: "rgba(229, 229, 229, 0.7)",
-                    animationDelay: "450ms",
-                  }}
-                ></div>
-                <div
-                  className="w-2.5 h-2.5 rounded-full animate-bounce"
-                  style={{
-                    backgroundColor: "rgba(229, 229, 229, 0.7)",
-                    animationDelay: "600ms",
-                  }}
-                ></div>
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-2 h-2 rounded-full bg-[#d4af37] animate-subtle-bounce"
+                    style={{ animationDelay: `${i * 200}ms` }}
+                  ></div>
+                ))}
               </div>
             </div>
           </div>
@@ -290,8 +259,8 @@ const AIAssistant = () => {
           </div>
         )}
         {selectedFile && (
-          <div className="w-fit flex items-center justify-between px-2 py-1 bg-black/20 rounded-md mb-2">
-            <span className="text-xs text-neutral-light truncate">
+          <div className="w-fit flex items-center justify-between px-2 py-1 bg-[rgba(0,0,0,0.2)] rounded-md mb-2">
+            <span className="text-xs text-[#f3e9dc] truncate">
               {selectedFile.name}
             </span>
             <button
@@ -303,7 +272,7 @@ const AIAssistant = () => {
           </div>
         )}
         <div className="flex items-center">
-          <div className="flex items-center space-x-2 text-neutral-light/60">
+          <div className="flex items-center space-x-2 text-[rgba(243,233,220,0.6)]">
             <button className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
               <PlusIcon size={18} />
             </button>
@@ -333,15 +302,15 @@ const AIAssistant = () => {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
             placeholder="Ask your AI assistant..."
-            className="flex-1 bg-transparent border-none outline-none text-neutral-light placeholder-neutral-light/50 mx-2 py-2"
+            className="flex-1 bg-transparent border-none outline-none text-[#f3e9dc] placeholder-[rgba(243,233,220,0.5)] mx-2 py-2"
           />
           <button
             onClick={handleSend}
             disabled={!inputText.trim() && !selectedFile}
             className={`p-2 rounded-full transition-colors ${
               inputText.trim() || selectedFile
-                ? "bg-gold/20 text-[#D4AF37] hover:bg-gold/30"
-                : "text-neutral-light/30"
+                ? "bg-[rgba(212,175,55,0.2)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.3)]"
+                : "text-[rgba(243,233,220,0.3)]"
             }`}
           >
             <SendIcon size={18} />
