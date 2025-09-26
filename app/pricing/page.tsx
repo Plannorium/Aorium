@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import PricingSection from "../components/sections/PricingSection";
+import Link from "next/link";
 
 const PricingPage = () => {
   return (
@@ -24,7 +25,9 @@ const PricingPage = () => {
                 <Link href="/terms" className="hover:underline">
                   Terms and Services
                 </Link>
-                <span>© {new Date().getFullYear()} Aorium. All rights reserved.</span>
+                <span>
+                  © {new Date().getFullYear()} Aorium. All rights reserved.
+                </span>
               </div>
             </div>
           </div>

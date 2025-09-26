@@ -12,6 +12,7 @@ import {
   UserCircle2Icon,
   UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 const FeaturesPageSection = () => {
   return (
@@ -118,7 +119,9 @@ const FeaturesPage = () => {
                 <Link href="/terms" className="hover:underline">
                   Terms and Services
                 </Link>
-                <span>© {new Date().getFullYear()} Aorium. All rights reserved.</span>
+                <span>
+                  © {new Date().getFullYear()} Aorium. All rights reserved.
+                </span>
               </div>
             </div>
           </div>
