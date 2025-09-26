@@ -3,8 +3,8 @@ import Link from "next/link";
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg" | "icon";
   href?: string;
   onClick?: () => void;
   className?: string;
@@ -32,12 +32,14 @@ const Button = ({
       "bg-secondary text-white hover:bg-secondary/90 hover:shadow-lg hover:shadow-secondary/20 active:scale-95",
     outline:
       "bg-transparent border border-gold text-[#D4AF37] hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10 active:scale-95",
+    ghost: "hover:bg-gray-100",
   };
 
   const sizeStyles = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-5 py-2.5",
     lg: "px-7 py-3.5 text-lg",
+    icon: "h-9 w-9",
   };
 
   const disabledStyles = disabled

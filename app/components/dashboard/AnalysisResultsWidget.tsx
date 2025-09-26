@@ -120,18 +120,17 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
   };
 
   return (
-    <Card
-      className={`p-6 ${
-        !results.length && !isLoading ? "" : "max-h-[60vh]"
-      } overflow-y-scroll scrollbar-webkit scrollbar-firefox`}
-      hover={true}
-    >
+    <Card className={`p-6 `} hover={true}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-montserrat font-semibold text-xl text-gold">
           AI Analysis Results
         </h3>
         <Button onClick={handleAnalyze} disabled={isAnalyzing || isLoading}>
-          {isAnalyzing ? "Analyzing..." : "Run Analysis"}
+          {isAnalyzing
+            ? "Analyzing..."
+            : results.length > 0
+            ? "Run New Analysis"
+            : "Run Analysis"}
         </Button>
       </div>
       {analysisError && (
@@ -170,12 +169,6 @@ export const AnalysisResultsWidget: React.FC<AnalysisResultsWidgetProps> = ({
               </div>
 
               <ParsedAnalysisResult resultString={result.result} />
-
-              {result.context && (
-                <p className="text-neutral-light/60 text-sm mt-3 pt-3 border-t border-white/10">
-                  Context: {result.context}
-                </p>
-              )}
             </div>
           ))}
         </div>

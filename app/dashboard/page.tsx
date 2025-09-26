@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from "react";
 import type { AnalysisResult } from "../../prisma/generated/client";
 import Card from "../components/ui/Card";
-import AnalyticsWidget from "../components/dashboard/AnalyticsWidget";
 import AIAssistant from "../components/dashboard/AIAssistant";
-import { AnalysisResultsWidget } from "../components/dashboard/AnalysisResultsWidget";
 import LineChart from "../components/charts/LineChart";
 import BarChart from "../components/charts/BarChart";
+import Link from "next/link";
 import Button from "../components/ui/Button";
 import {
   BarChart2Icon,
@@ -20,9 +19,9 @@ import {
   DownloadIcon,
   RefreshCwIcon,
   ChevronDownIcon,
-  SearchIcon,
   UserIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
   const [timeframe, setTimeframe] = useState("week");
@@ -33,6 +32,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [marketTrendData, setMarketTrendData] = useState<any[]>([]);
   const [regionData, setRegionData] = useState<any[]>([]);
+  const router = useRouter();
 
   const fetchAnalysisResults = async () => {
     setIsLoading(true);
@@ -102,94 +102,54 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
-            <div className="relative hidden md:block">
-              <SearchIcon
-                size={18}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-light/50"
-              />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-neutral-light placeholder-neutral-light/50 focus:outline-none focus:ring-1 focus:ring-gold/50 focus:border-gold/50"
-              />
-            </div>
             <div className="flex items-center space-x-3">
               <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-neutral-light transition-colors">
                 <BellIcon size={20} />
               </button>
-              <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-neutral-light transition-colors">
+              <button
+                onClick={() => router.push("/user")}
+                className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-neutral-light transition-colors cursor-pointer"
+              >
                 <SettingsIcon size={20} />
               </button>
             </div>
           </div>
         </div>
         {/* Dashboard Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <div className="relative">
-              <button className="flex items-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-neutral-light">
-                <span>Last 30 days</span>
-                <ChevronDownIcon size={16} className="ml-2" />
-              </button>
-            </div>
-          </div>
+        <div className="flex flex-col md:flex-row justify-end items-start md:items-center mb-8">
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="flex items-center">
-              <FilterIcon size={16} className="mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm" className="flex items-center">
-              <DownloadIcon size={16} className="mr-2" />
-              Export
-            </Button>
             <Button
               variant="outline"
               size="sm"
               className="flex items-center p-2"
+              onClick={() => {
+                fetchAnalysisResults();
+                fetchFiles();
+              }}
             >
               <RefreshCwIcon size={16} />
             </Button>
           </div>
         </div>
-        {/* Analytics Widgets */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <AnalyticsWidget
-            title="Total Visitors"
-            value="12,456"
-            change={{
-              value: "12%",
-              positive: true,
-            }}
-            icon={<UsersIcon size={20} />}
-          />
-          <AnalyticsWidget
-            title="Market Growth"
-            value="23.5%"
-            change={{
-              value: "5%",
-              positive: true,
-            }}
-            icon={<TrendingUpIcon size={20} />}
-          />
-          <AnalyticsWidget
-            title="Engagement"
-            value="68%"
-            change={{
-              value: "3%",
-              positive: false,
-            }}
-            icon={<BarChart2Icon size={20} />}
-          />
-          <AnalyticsWidget
-            title="GCC Reach"
-            value="6/6"
-            change={{
-              value: "1",
-              positive: true,
-            }}
-            icon={<GlobeIcon size={20} />}
-          />
-        </div>
+        {/* Benchmarking Widget */}
+        <Card className="p-6 mb-5" hover={true}>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="font-montserrat font-semibold text-xl text-gold">
+                Benchmarking
+              </h3>
+              <p className="text-sm text-neutral-light/60 mt-1">
+                Compare your performance against industry benchmarks and
+                competitors.
+              </p>
+            </div>
+            <Link href="/dashboard/analytics/benchmarking">
+              <Button variant="outline" size="sm">
+                Go to Benchmarking
+              </Button>
+            </Link>
+          </div>
+        </Card>
         {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Charts - 2/3 width */}
@@ -224,15 +184,6 @@ const Dashboard = () => {
               <LineChart data={marketTrendData} dataKey="value" height={300} />
             </Card>
 
-            {/* AI Analysis Results */}
-            <AnalysisResultsWidget
-              results={analysisResults}
-              isLoading={isLoading || filesLoading}
-              onAnalysisComplete={fetchAnalysisResults}
-              files={files}
-              onUploadComplete={fetchFiles}
-            />
-
             {/* Regional Performance */}
             <Card className="p-6" hover={true}>
               <div className="flex justify-between items-center mb-6">
@@ -245,7 +196,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
-                  View Details
+                  Explore Regions
                 </Button>
               </div>
               <BarChart
@@ -259,6 +210,43 @@ const Dashboard = () => {
           {/* AI Assistant - 1/3 width */}
           <div className="lg:col-span-1">
             <AIAssistant />
+          </div>
+          {/* Side Widgets - Full width */}
+          <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-6" hover={true}>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                    Market News
+                  </h3>
+                  <p className="text-sm text-neutral-light/60 mt-1">
+                    Stay up to date with the latest market news.
+                  </p>
+                </div>
+                <Link href="/dashboard/analytics/market-news">
+                  <Button variant="outline" size="sm">
+                    Read News
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+            <Card className="p-6" hover={true}>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="font-montserrat font-semibold text-xl text-gold">
+                    Analysis Results
+                  </h3>
+                  <p className="text-sm text-neutral-light/60 mt-1">
+                    View your latest analysis results.
+                  </p>
+                </div>
+                <Link href="/dashboard/analytics/analysis-results">
+                  <Button variant="outline" size="sm">
+                    View Results
+                  </Button>
+                </Link>
+              </div>
+            </Card>
           </div>
         </div>
       </div>

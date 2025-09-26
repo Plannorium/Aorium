@@ -86,58 +86,17 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  console.log("API Analytics GET Results:", "called");
-
   try {
     const userId = await getUserFromToken(req);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const fileCount = await prisma.file.count({
-      where: {
-        ownerId: userId,
-        section: "historicalPerformance",
-      },
-    });
+    const body = await req.json();
+    const { query } = body;
 
-    const files = await prisma.file.findMany({
-      where: {
-        ownerId: userId,
-        section: "historicalPerformance",
-      },
-      orderBy: {
-        uploadedAt: "desc",
-      },
-      ...(fileCount > 1 && { take: 2 }),
-    });
-
-    if (files.length === 0) {
-      return NextResponse.json(
-        {
-          message:
-            "Please upload your company's historical data for analysis. We require data for the following sections: Financials, Marketing, and Sales.",
-        },
-        { status: 400 }
-      );
-    }
-
-    let fileContents = "";
-    for (const file of files) {
-      try {
-        const fileResponse = await fetch(file.url);
-        if (fileResponse.ok) {
-          const fileContent = await fileResponse.text();
-          fileContents += `--- ${file.filename} (${file.section}) ---
-${fileContent}\n\n`;
-        } else {
-          console.error(
-            `Failed to fetch file content from ${file.url}. Status: ${fileResponse.status}`
-          );
-        }
-      } catch (error) {
-        console.error(`Error fetching file content:`, error);
-      }
+    if (!query) {
+      return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -145,71 +104,148 @@ ${fileContent}\n\n`;
       include: { onboarding: true },
     });
 
-    const prompt = `
-      Provide a comprehensive business analysis for ${
-        user?.onboarding?.businessName || "the company"
-      },
-      a ${user?.onboarding?.businessType || ""} business of ${
-      user?.onboarding?.businessSize || ""
-    } size
-      operating in ${user?.onboarding?.region || ""}. Key goals include: ${
-      user?.onboarding?.goals.join(", ") || ""
-    }.
+    let prompt;
+    if (query.startsWith("Analyze competitor:")) {
+      const competitorName = query.replace("Analyze competitor:", "").trim();
+      prompt = `
+        Analyze the specified competitor against the user's brand and return a JSON object for charting.
+        User Brand: ${user?.onboarding?.businessName || "the company"}
+        Competitor: ${competitorName}
 
-      Analyze the following historical data:
-      ${fileContents}
+        The JSON object should have the following structure:
+        {
+          "followerGrowth": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}],
+          "engagementRate": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}],
+          "postReach": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}],
+          "sentiment": {
+            "positive": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}],
+            "neutral": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}],
+            "negative": [{"name": "Your Brand", "value": <number>}, {"name": "${competitorName}", "value": <number>}]
+          }
+        }
+        The output should be only the JSON object.
+      `;
+    } else if (query.startsWith("Compare")) {
+      const brands = query
+        .replace("Compare", "")
+        .split("and")
+        .map((b) => b.trim());
+      const brandA = brands[0];
+      const brandB = brands[1];
+      prompt = `
+        Compare the two specified brands and return a JSON object for charting.
+        Brand A: ${brandA}
+        Brand B: ${brandB}
 
-      Structure the analysis into the following sections:
-      1. Financial Performance: Trends, strengths, and weaknesses.
-      2. Marketing Effectiveness: Campaign evaluation and initiatives.
-      3. Sales Performance: Growth opportunities and insights.
+        The JSON object should have the following structure:
+        {
+          "followerGrowth": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}],
+          "engagementRate": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}],
+          "postReach": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}],
+          "sentiment": {
+            "positive": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}],
+            "neutral": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}],
+            "negative": [{"name": "${brandA}", "value": <number>}, {"name": "${brandB}", "value": <number>}]
+          }
+        }
+        The output should be only the JSON object.
+      `;
+    } else if (query.startsWith("Analyze historical data")) {
+      const fileCount = await prisma.file.count({
+        where: {
+          ownerId: userId,
+          section: "historicalPerformance",
+        },
+      });
 
-      Ensure the analysis is professional, concise, and provides actionable insights.
-    `;
+      const files = await prisma.file.findMany({
+        where: {
+          ownerId: userId,
+          section: "historicalPerformance",
+        },
+        orderBy: {
+          uploadedAt: "desc",
+        },
+        ...(fileCount > 1 && { take: 2 }),
+      });
+
+      if (files.length === 0) {
+        return NextResponse.json(
+          {
+            message:
+              "Please upload your company's historical data for analysis. We require data for the following sections: Financials, Marketing, and Sales.",
+          },
+          { status: 400 }
+        );
+      }
+
+      let fileContents = "";
+      for (const file of files) {
+        try {
+          const fileResponse = await fetch(file.url);
+          if (fileResponse.ok) {
+            const fileContent = await fileResponse.text();
+            const truncatedContent = fileContent.substring(0, 15000);
+            fileContents += `--- ${file.filename} (${file.section}) ---\n${truncatedContent}\n\n`;
+          } else {
+            console.error(
+              `Failed to fetch file content from ${file.url}. Status: ${fileResponse.status}`
+            );
+          }
+        } catch (error) {
+          console.error(`Error fetching file content:`, error);
+        }
+      }
+
+      prompt = `
+        Provide a comprehensive business analysis for ${
+          user?.onboarding?.businessName || "the company"
+        },
+        a ${user?.onboarding?.businessType || ""} business of ${
+        user?.onboarding?.businessSize || ""
+      } size
+        operating in ${user?.onboarding?.region || ""}. Key goals include: ${
+        user?.onboarding?.goals.join(", ") || ""
+      }.
+
+        Analyze the following historical data:
+        ${fileContents}
+
+        Structure the analysis into the following sections:
+        1. Financial Performance: Trends, strengths, and weaknesses.
+        2. Marketing Effectiveness: Campaign evaluation and initiatives.
+        3. Sales Performance: Growth opportunities and insights.
+
+        Ensure the analysis is professional, concise, and provides actionable insights. The total length should be under 1000 words.
+      `;
+    } else {
+      return NextResponse.json({ error: "Invalid query" }, { status: 400 });
+    }
 
     const completion: { model: string; content: string } | null =
       await safeCallModel([{ role: "user", content: prompt }]);
 
     if (completion && completion.content) {
-      const analysisResult = completion.content;
-      const formattingPrompt = `Please format the following business analysis into a clean, human-readable format. Use markdown for headings, lists, and emphasis. The analysis should be easy to read and understand. Here is the analysis: ${analysisResult}`;
-
-      const formattedCompletion: { model: string; content: string } | null =
-        await safeCallModel([{ role: "user", content: formattingPrompt }]);
-
-      if (formattedCompletion && formattedCompletion.content) {
-        const formattedResult = formattedCompletion.content;
-        const modelUsed = formattedCompletion.model;
-
-        await prisma.analysisResult.create({
-          data: {
-            userId: userId,
-            task: "Comprehensive Business Analysis",
-            result: formattedResult,
-            context: JSON.stringify({
-              businessContext: {
-                businessName: user?.onboarding?.businessName,
-                businessType: user?.onboarding?.businessType,
-                businessSize: user?.onboarding?.businessSize,
-                region: user?.onboarding?.region,
-                goals: user?.onboarding?.goals,
-              },
-              model: modelUsed,
-            }),
-          },
-        });
-        return NextResponse.json({
-          success: true,
-          result: formattedResult,
-        });
+      try {
+        const data = JSON.parse(completion.content);
+        return NextResponse.json(data);
+      } catch (e) {
+        console.error("Failed to parse model output:", e);
+        return NextResponse.json(
+          { error: "Failed to generate analysis" },
+          { status: 500 }
+        );
       }
+    } else {
+      return NextResponse.json(
+        { error: "Failed to generate analysis" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({ success: false, result: null });
   } catch (error) {
-    console.error("API Analytics Error:", error);
+    console.error("API Analytics POST Error:", error);
     return NextResponse.json(
-      { error: "Failed to process analytics request" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

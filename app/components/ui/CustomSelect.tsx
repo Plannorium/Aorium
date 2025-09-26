@@ -51,7 +51,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         />
       </button>
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-black/65 border border-white/10 rounded-lg shadow-lg">
+        <div className="absolute z-10 mt-1 w-full bg-primary-dark border border-white/10 rounded-lg shadow-lg">
           <ul className="py-1">
             {options.map((option) => (
               <li

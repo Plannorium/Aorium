@@ -3,17 +3,31 @@ import { safeCallModel } from "../../lib/aiClient";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const formData = await req.formData();
+    const message = formData.get("message") as string;
+    const file = formData.get("file") as File | null;
 
-    if (!message) {
+    let fileContent = "";
+    if (file) {
+      fileContent = await file.text();
+    }
+
+    if (!message && !fileContent) {
       return NextResponse.json(
-        { error: "Message is required" },
+        { error: "Message or file is required" },
         { status: 400 }
       );
     }
 
     const completion: { model: string; content: string } | null =
-      await safeCallModel([{ role: "user", content: message }]);
+      await safeCallModel([
+        {
+          role: "user",
+          content: `${message}${
+            fileContent ? `\n\nFile content:\n${fileContent}` : ""
+          }`,
+        },
+      ]);
 
     if (completion && completion.content) {
       return NextResponse.json({ reply: completion.content });

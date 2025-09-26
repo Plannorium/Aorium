@@ -1,6 +1,7 @@
 import "./globals.css";
 import Header from "./components/Header";
 import CustomCursor from "./components/ui/CustomCursor";
+import QueryProvider from "./components/QueryProvider"; // Import the new component
 
 export default function RootLayout({
   children,
@@ -9,12 +10,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="hide-cursor">
+      <body className="hide-cursor overflow-y-scroll scrollbar-webkit scrollbar-firefox">
         <CustomCursor />
-        <div className="flex flex-col min-h-screen bg-primary-dark text-neutral-light font-inter">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
+        <QueryProvider>
+          {" "}
+          {/* Add the new component here */}
+          <div className="flex flex-col min-h-screen bg-primary-dark text-neutral-light font-inter">
+            <Header />
+            <main className="flex-1">{children}</main>
+          </div>
+        </QueryProvider>
       </body>
     </html>
   );

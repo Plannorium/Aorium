@@ -1,23 +1,72 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   SendIcon,
   BotIcon,
   PlusIcon,
   SmileIcon,
-  ImageIcon,
   PaperclipIcon,
+  Expand,
+  Shrink,
+  XIcon,
 } from "lucide-react";
 import Card from "../ui/Card";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+
 interface Message {
   id: number;
   text: string;
   isUser: boolean;
   timestamp: Date;
+  fileName?: string;
 }
+
+const Typewriter = ({ text, speed = 2.8 }) => {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText(text.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, speed);
+
+    return () => clearInterval(typingInterval);
+  }, [text, speed]);
+
+  return <p className="whitespace-pre-wrap">{displayedText}</p>;
+};
+
 const AIAssistant = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textInputRef = useRef<HTMLInputElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -33,26 +82,54 @@ const AIAssistant = () => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isTyping]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+      textInputRef.current?.focus();
+    }
+    if (event.target) {
+      event.target.value = "";
+    }
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setInputText((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
   const handleSend = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() && !selectedFile) return;
 
     const newUserMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: inputText,
       isUser: true,
       timestamp: new Date(),
+      fileName: selectedFile?.name,
     };
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setInputText("");
     setIsTyping(true);
+    const fileToSend = selectedFile;
+    setSelectedFile(null);
+
+    const formData = new FormData();
+    formData.append("message", inputText);
+    if (fileToSend) {
+      formData.append("file", fileToSend);
+    }
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: inputText }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -60,22 +137,41 @@ const AIAssistant = () => {
       }
 
       const data = await response.json();
+      const cleanedReply = data.reply.replace(/[^a-zA-Z0-9\s,-.]/g, "");
 
-      const aiResponse: Message = {
-        id: messages.length + 2,
-        text: data.reply,
+      // Artificial delay to ensure the typing indicator is visible
+      setTimeout(() => {
+        const aiResponse: Message = {
+          id: Date.now() + 1, // Ensure unique ID
+          text: cleanedReply,
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages((prevMessages) => [...prevMessages, aiResponse]);
+        setIsTyping(false);
+      }, 1500); // 1.5-second delay
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      const errorResponse: Message = {
+        id: Date.now() + 1,
+        text: "Sorry, I encountered an error processing your request. Please try again.",
         isUser: false,
         timestamp: new Date(),
       };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    } finally {
+      setMessages((prevMessages) => [...prevMessages, errorResponse]);
       setIsTyping(false);
     }
   };
+
   return (
-    <Card className="flex flex-col h-full" variant="highlight">
+    <Card
+      className={`flex flex-col h-full  ${
+        isFullScreen
+          ? "fixed inset-0 z-50 bg-[#071a3a]/90 backdrop-blur-sm"
+          : "max-h-[600px]"
+      }`}
+      variant="highlight"
+    >
       <div className="p-4 border-b border-gold/20 flex items-center justify-between">
         <div className="flex items-center">
           <div className="p-1.5 rounded-full bg-gold/10 text-[#D4AF37] mr-3">
@@ -89,10 +185,20 @@ const AIAssistant = () => {
           <span className="text-xs px-2 py-0.5 bg-gold/20 text-[#D4AF37] rounded-full">
             Online
           </span>
+          <button
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            className="ml-4 p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5"
+          >
+            {isFullScreen ? <Shrink size={18} /> : <Expand size={18} />}
+          </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[400px]">
-        {messages.map((message) => (
+      <div
+        className={`flex-1 overflow-y-auto p-4 space-y-4 ${
+          isFullScreen ? "" : "min-h-[400px]"
+        }`}
+      >
+        {messages.map((message, index) => (
           <div
             key={message.id}
             className={`flex ${
@@ -106,7 +212,18 @@ const AIAssistant = () => {
                   : "bg-secondary/20 text-neutral-light rounded-tl-none"
               }`}
             >
-              <p>{message.text}</p>
+              {message.isUser ? (
+                <p className="whitespace-pre-wrap">{message.text}</p>
+              ) : index === messages.length - 1 ? (
+                <Typewriter text={message.text} />
+              ) : (
+                <p className="whitespace-pre-wrap">{message.text}</p>
+              )}
+              {message.fileName && (
+                <div className="text-xs opacity-80 mt-2 p-2 bg-black/20 rounded-md">
+                  Attached file: {message.fileName}
+                </div>
+              )}
               {isMounted && (
                 <div className="text-xs opacity-60 mt-1 flex justify-end">
                   {message.timestamp.toLocaleTimeString([], {
@@ -120,45 +237,97 @@ const AIAssistant = () => {
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-lg p-3 bg-secondary/20 text-neutral-light rounded-tl-none">
-              <div className="flex space-x-1">
+            <div
+              className="max-w-[80%] rounded-lg p-3 shadow-md rounded-tl-none"
+              style={{ backgroundColor: "rgba(10, 24, 51, 0.2)" }}
+            >
+              <div className="flex items-center space-x-1.5">
                 <div
-                  className="w-2 h-2 bg-neutral-light/70 rounded-full animate-bounce"
+                  className="w-2.5 h-2.5 rounded-full animate-bounce"
                   style={{
+                    backgroundColor: "rgba(229, 229, 229, 0.7)",
                     animationDelay: "0ms",
                   }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-neutral-light/70 rounded-full animate-bounce"
+                  className="w-2.5 h-2.5 rounded-full animate-bounce"
                   style={{
+                    backgroundColor: "rgba(229, 229, 229, 0.7)",
                     animationDelay: "150ms",
                   }}
                 ></div>
                 <div
-                  className="w-2 h-2 bg-neutral-light/70 rounded-full animate-bounce"
+                  className="w-2.5 h-2.5 rounded-full animate-bounce"
                   style={{
+                    backgroundColor: "rgba(229, 229, 229, 0.7)",
                     animationDelay: "300ms",
+                  }}
+                ></div>
+                <div
+                  className="w-2.5 h-2.5 rounded-full animate-bounce"
+                  style={{
+                    backgroundColor: "rgba(229, 229, 229, 0.7)",
+                    animationDelay: "450ms",
+                  }}
+                ></div>
+                <div
+                  className="w-2.5 h-2.5 rounded-full animate-bounce"
+                  style={{
+                    backgroundColor: "rgba(229, 229, 229, 0.7)",
+                    animationDelay: "600ms",
                   }}
                 ></div>
               </div>
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 border-t border-white/10">
+      <div className="px-4 pb-5 pt-2 border-t border-white/10 relative">
+        {showEmojiPicker && (
+          <div ref={emojiPickerRef} className="absolute bottom-full mb-2 z-10">
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </div>
+        )}
+        {selectedFile && (
+          <div className="w-fit flex items-center justify-between px-2 py-1 bg-black/20 rounded-md mb-2">
+            <span className="text-xs text-neutral-light truncate">
+              {selectedFile.name}
+            </span>
+            <button
+              onClick={() => setSelectedFile(null)}
+              className="p-1 hover:text-red-500 flex-shrink-0"
+            >
+              <XIcon size={16} />
+            </button>
+          </div>
+        )}
         <div className="flex items-center">
           <div className="flex items-center space-x-2 text-neutral-light/60">
             <button className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
               <PlusIcon size={18} />
             </button>
-            <button className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5"
+            >
               <PaperclipIcon size={18} />
             </button>
-            <button className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <button
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="p-1.5 hover:text-[#D4AF37] transition-colors rounded-full hover:bg-white/5"
+            >
               <SmileIcon size={18} />
             </button>
           </div>
           <input
+            ref={textInputRef}
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -168,9 +337,9 @@ const AIAssistant = () => {
           />
           <button
             onClick={handleSend}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() && !selectedFile}
             className={`p-2 rounded-full transition-colors ${
-              inputText.trim()
+              inputText.trim() || selectedFile
                 ? "bg-gold/20 text-[#D4AF37] hover:bg-gold/30"
                 : "text-neutral-light/30"
             }`}
@@ -182,4 +351,5 @@ const AIAssistant = () => {
     </Card>
   );
 };
+
 export default AIAssistant;
