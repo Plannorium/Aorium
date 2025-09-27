@@ -184,6 +184,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -210,8 +214,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/client\"\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id              String           @id @default(auto()) @map(\"_id\") @db.ObjectId\n  email           String           @unique\n  password        String\n  profilePicture  String?\n  name            String?\n  createdAt       DateTime         @default(now())\n  updatedAt       DateTime         @updatedAt\n  sessions        Session[]\n  onboarding      Onboarding?\n  files           File[]\n  analysisResults AnalysisResult[]\n}\n\nmodel Session {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId    String   @db.ObjectId\n  user      User     @relation(fields: [userId], references: [id])\n  token     String   @unique\n  createdAt DateTime @default(now())\n  expiresAt DateTime\n}\n\nmodel Onboarding {\n  id                 String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId             String   @unique @db.ObjectId\n  user               User     @relation(fields: [userId], references: [id])\n  step               Int      @default(1)\n  completed          Boolean  @default(false)\n  businessName       String?\n  businessType       String?\n  businessSize       String?\n  region             String?\n  goals              String[] @default([])\n  uploadedFiles      Json[]   @default([])\n  competitors        String?\n  targetAudience     String?\n  industryChallenges String?\n  contentFocus       String[] @default([])\n  preferredPlatforms String[] @default([])\n  contentKPIs        String[] @default([])\n}\n\nmodel File {\n  id         String    @id @default(auto()) @map(\"_id\") @db.ObjectId\n  ownerId    String    @db.ObjectId\n  filename   String\n  url        String\n  publicId   String?\n  mime       String?\n  size       Int?\n  section    String?\n  uploadedAt DateTime?\n  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)\n}\n\nmodel AnalysisResult {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId    String   @db.ObjectId\n  task      String\n  result    String\n  context   String\n  createdAt DateTime @default(now())\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n",
-  "inlineSchemaHash": "e15e30003d38bad6f345284851f2f9e91fa1b90273d0fe3763dccb8a50b2bf00",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/client\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"mongodb\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id              String           @id @default(auto()) @map(\"_id\") @db.ObjectId\n  email           String           @unique\n  password        String\n  profilePicture  String?\n  name            String?\n  createdAt       DateTime         @default(now())\n  updatedAt       DateTime         @updatedAt\n  sessions        Session[]\n  onboarding      Onboarding?\n  files           File[]\n  analysisResults AnalysisResult[]\n}\n\nmodel Session {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId    String   @db.ObjectId\n  user      User     @relation(fields: [userId], references: [id])\n  token     String   @unique\n  createdAt DateTime @default(now())\n  expiresAt DateTime\n}\n\nmodel Onboarding {\n  id                 String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId             String   @unique @db.ObjectId\n  user               User     @relation(fields: [userId], references: [id])\n  step               Int      @default(1)\n  completed          Boolean  @default(false)\n  businessName       String?\n  businessType       String?\n  businessSize       String?\n  region             String?\n  goals              String[] @default([])\n  uploadedFiles      Json[]   @default([])\n  competitors        String?\n  targetAudience     String?\n  industryChallenges String?\n  contentFocus       String[] @default([])\n  preferredPlatforms String[] @default([])\n  contentKPIs        String[] @default([])\n}\n\nmodel File {\n  id         String    @id @default(auto()) @map(\"_id\") @db.ObjectId\n  ownerId    String    @db.ObjectId\n  filename   String\n  url        String\n  publicId   String?\n  mime       String?\n  size       Int?\n  section    String?\n  uploadedAt DateTime?\n  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)\n}\n\nmodel AnalysisResult {\n  id        String   @id @default(auto()) @map(\"_id\") @db.ObjectId\n  userId    String   @db.ObjectId\n  task      String\n  result    String\n  context   String\n  createdAt DateTime @default(now())\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n",
+  "inlineSchemaHash": "d20ec1440f208c90f93c5bbe352b33ce626f1398b7906f9ec17aa0d88980629d",
   "copyEngine": true
 }
 
@@ -252,6 +256,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "prisma/generated/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-rhel-openssl-3.0.x.so.node");
+path.join(process.cwd(), "prisma/generated/client/libquery_engine-rhel-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "prisma/generated/client/schema.prisma")
