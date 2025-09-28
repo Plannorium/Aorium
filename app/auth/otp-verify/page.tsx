@@ -63,12 +63,15 @@ const OtpVerifyPage = () => {
         <div className="bg-slate-900/30 backdrop-blur-lg border border-slate-700/50 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
           <div className="p-8 md:p-12">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-neutral-light tracking-tighter">
+              <h1
+                className="text-4xl font-bold tracking-tighter"
+                style={{ color: "#F5F5F5" }}
+              >
                 Verify Your Email
               </h1>
-              <p className="text-neutral-light/70 mt-2">
-                An OTP has been sent to <strong>{email}</strong>. Please enter
-                it below to verify your account.
+              <p className="mt-2" style={{ color: "#F5F5F5B3" }}>
+                An OTP code has been sent to <strong>{email}</strong>. Please
+                enter it below to verify your account.
               </p>
             </div>
 
@@ -80,7 +83,9 @@ const OtpVerifyPage = () => {
                 className="text-center text-green-400"
               >
                 <CheckCircle2 size={48} className="mx-auto mb-4" />
-                <p className="text-lg font-semibold">Email verified successfully!</p>
+                <p className="text-lg font-semibold">
+                  Email verified successfully!
+                </p>
                 <p className="text-sm">Redirecting to login...</p>
               </motion.div>
             ) : (
