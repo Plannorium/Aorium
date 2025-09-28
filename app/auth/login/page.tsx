@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -18,21 +19,16 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        // Store the token (e.g., in localStorage)
-        localStorage.setItem("token", data.token);
-        router.push("/dashboard");
+      if (result?.error) {
+        setError(result.error);
       } else {
-        const errorData = await res.json();
-        setError(errorData.error || "Login failed. Please try again.");
+        router.push("/dashboard");
       }
     } catch (err) {
       setError("An unexpected error occurred. Please try again later.");
@@ -42,7 +38,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8.5rem)] flex items-center justify-center bg-[#071a3a] p-4">
+    <div className="min-h-[calc(100vh-8.5rem)] flex items-center justify-center bg-[#071a3a] p-3">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -60,7 +56,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label
                   htmlFor="email"
@@ -74,7 +70,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="mt-1 block w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-neutral-light placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all"
+                  className="mt-1 block w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-neutral-light placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all"
                   placeholder="you@example.com"
                 />
               </div>
@@ -93,7 +89,7 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="block w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-neutral-light placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all"
+                    className="mt-1 block w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-neutral-light placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all"
                     placeholder="••••••••"
                   />
                   <button
@@ -118,7 +114,7 @@ const LoginPage = () => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center bg-[#D4AF37] text-[#0A1833] font-semibold rounded-lg px-4 py-3 disabled:bg-[#b38f2c] disabled:cursor-not-allowed transition-all duration-300 hover:bg-[#FFD700] hover:shadow-lg hover:shadow-[#d4af37]/20"
+                  className="w-full flex items-center justify-center bg-[#D4AF37] text-[#0A1833] font-semibold rounded-lg px-3 py-2 disabled:bg-[#b38f2c] disabled:cursor-not-allowed transition-all duration-300 hover:bg-[#FFD700] hover:shadow-lg hover:shadow-[#d4af37]/20"
                 >
                   {loading ? (
                     <motion.div
@@ -140,6 +136,35 @@ const LoginPage = () => {
               </div>
             </form>
 
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-slate-900/30 px-2 text-slate-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                className="w-full flex items-center justify-center bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-neutral-light font-semibold hover:bg-slate-800 transition-all"
+              >
+                <svg
+                  className="w-5 h-5 mr-3"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12.5C5,8.75 8.36,5.73 12.19,5.73C15.19,5.73 17.5,6.73 18.69,8.14L21.35,5.62C19.27,3.5 16.36,2 12.19,2C6.42,2 2.03,6.8 2.03,12.5C2.03,18.2 6.42,23 12.19,23C17.96,23 21.54,18.81 21.54,12.81C21.54,12.19 21.45,11.61 21.35,11.1Z" />
+                </svg>
+                Sign in with Google
+              </motion.button>
+            </div>
+
             <div className="text-center mt-8">
               <p className="text-sm text-slate-500">
                 Don&apos;t have an account?{" "}
@@ -150,14 +175,17 @@ const LoginPage = () => {
                   Sign up
                 </a>
               </p>
-              <p className="text-sm text-slate-500 mt-2">
-                By signing in, you agree to our{" "}
-                <a href="/terms" className="font-medium text-[#D4AF37] hover:underline">
-                  Terms and Services
-                </a>
-                .
-              </p>
             </div>
+            <p className="text-sm text-slate-500 mt-2">
+              By signing in, you agree to our{" "}
+              <a
+                href="/terms"
+                className="font-medium text-[#D4AF37] hover:underline"
+              >
+                Terms and Services
+              </a>
+              .
+            </p>
           </div>
         </div>
       </motion.div>

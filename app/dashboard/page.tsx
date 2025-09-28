@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -23,7 +24,10 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { useSession } from "next-auth/react";
+
 const Dashboard = () => {
+  const { data: session, status } = useSession();
   const [timeframe, setTimeframe] = useState("week");
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,9 +73,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchAnalysisResults();
-    fetchFiles();
-  }, []);
+    if (session) {
+      fetchAnalysisResults();
+      fetchFiles();
+    }
+  }, [session]);
 
   useEffect(() => {
     if (user && user.onboarding) {

@@ -1,45 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
-import { jwtVerify } from "jose";
+import { getAuthenticatedUser } from "../../lib/auth";
+import { getToken } from "next-auth/jwt";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-
-async function getUserIdFromToken(req: Request) {
-  // Try Authorization header first (Bearer token)
-  const authHeader = req.headers.get("authorization");
-  let token: string | null = null;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  } else {
-    // Fallback: try cookie jwt_token
-    const cookieHeader = req.headers.get("cookie") || "";
-    const match = cookieHeader.match(/jwt_token=([^;]+)/);
-    token = match ? decodeURIComponent(match[1]) : null;
-  }
-  if (!token) {
-    return null;
-  }
+export async function GET(req: NextRequest) {
   try {
-    const verified = await jwtVerify(
-      token,
-      new TextEncoder().encode(JWT_SECRET)
-    );
-    const payload = verified.payload as { userId?: string };
-    return payload.userId || null;
-  } catch {
-    return null;
-  }
-}
+    let user = await getAuthenticatedUser();
+    if (!user) {
+      const token = await getToken({
+        req,
+        secret: process.env.NEXTAUTH_SECRET,
+      });
+      if (token && token.sub) {
+        user = await prisma.user.findUnique({ where: { id: token.sub }, include: { onboarding: true } });
+      }
+    }
 
-export async function GET(req: Request) {
-  try {
-    const userId = await getUserIdFromToken(req);
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const onboarding = await prisma.onboarding.findUnique({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     if (!onboarding) {
@@ -59,10 +41,17 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const userId = await getUserIdFromToken(req);
-    if (!userId) {
+    let user = await getAuthenticatedUser();
+    if (!user) {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+      if (token && token.sub) {
+        user = await prisma.user.findUnique({ where: { id: token.sub }, include: { onboarding: true } });
+      }
+    }
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -104,7 +93,7 @@ export async function POST(req: Request) {
     // Mark onboarding as completed and set step to final value (using 5 here)
     const FINAL_STEP = 5;
     const onboarding = await prisma.onboarding.upsert({
-      where: { userId },
+      where: { userId: user.id },
       update: {
         businessName,
         businessType,
@@ -122,7 +111,7 @@ export async function POST(req: Request) {
         step: FINAL_STEP,
       },
       create: {
-        userId,
+        userId: user.id,
         businessName,
         businessType,
         businessSize,
@@ -150,17 +139,24 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
-    const userId = await getUserIdFromToken(req);
-    if (!userId) {
+    let user = await getAuthenticatedUser();
+    if (!user) {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+      if (token && token.sub) {
+        user = await prisma.user.findUnique({ where: { id: token.sub }, include: { onboarding: true } });
+      }
+    }
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { step, completed } = await req.json();
 
     const updatedOnboarding = await prisma.onboarding.update({
-      where: { userId },
+      where: { userId: user.id },
       data: {
         step,
         completed,

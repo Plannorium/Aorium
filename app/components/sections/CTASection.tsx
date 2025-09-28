@@ -64,7 +64,7 @@ const CTASection = () => {
               </a>
               {/* Secondary button */}
               <a
-                href="/contact"
+                href="https://calendly.com/team-plannorium_/aorium-demo"
                 className="inline-flex items-center justify-center px-6 py-3 bg-white/10 text-white font-semibold rounded-lg shadow-md transition-all duration-300 hover:bg-white/20 hover:shadow-lg hover:-translate-y-0.5"
               >
                 Request a Demo

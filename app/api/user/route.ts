@@ -1,62 +1,15 @@
-import { cookies } from "next/headers";
 import { NextResponse, NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 import { prisma } from "../../lib/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+import { getAuthenticatedUser } from "../../lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    // Prefer cookie token, but fall back to Authorization header (Bearer)
-    let token = cookieStore.get("jwt_token")?.value;
-    if (!token) {
-      const authHeader =
-        request.headers.get("authorization") ||
-        request.headers.get("Authorization");
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.replace(/^Bearer /i, "");
-        console.log("API /api/user: Received token from Authorization header");
-      } else {
-        console.log(
-          "API /api/user: No token found in cookie or Authorization header"
-        );
-      }
-    } else {
-      console.log("API /api/user: Received token from cookie");
-    }
-
-    if (!token) {
-      return NextResponse.json(
-        { user: null, error: "Not authenticated" },
-        { status: 401 }
-      );
-    }
-
-    let decoded: { userId: string } | null = null;
-    try {
-      const verified = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
-      decoded = verified.payload as { userId: string };
-      console.log("API /api/user: Token decoded successfully:", decoded);
-    } catch (verifyError) {
-      console.error("API /api/user: Token verification failed:", verifyError);
-      return NextResponse.json(
-        { user: null, error: "Invalid token" },
-        { status: 401 }
-      );
-    }
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      include: { onboarding: true },
-    });
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       return NextResponse.json(
-        { user: null, error: "User not found" },
-        { status: 404 }
+        { user: null, error: "Not authenticated" },
+        { status: 401 }
       );
     }
 
@@ -73,35 +26,12 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    // support token from cookie or Authorization header
-    const cookieStore = await cookies();
-    let token = cookieStore.get("jwt_token")?.value;
-    if (!token) {
-      const authHeader =
-        request.headers.get("authorization") ||
-        request.headers.get("Authorization");
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.replace(/^Bearer /i, "");
-      }
-    }
-
-    if (!token) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return NextResponse.json(
         { message: "Not authenticated" },
         { status: 401 }
       );
-    }
-
-    let decoded: { userId: string } | null = null;
-    try {
-      const verified = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
-      decoded = verified.payload as { userId: string };
-    } catch (error) {
-      console.log("JWT verification failed:", error);
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
     const { name, email, profilePicture } = await request.json();
@@ -124,7 +54,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: decoded.userId },
+      where: { id: user.id },
       data: updateData,
     });
 

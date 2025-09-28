@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import cloudinaryModule, { UploadApiErrorResponse } from "cloudinary";
-import { jwtVerify } from "jose";
 import { prisma } from "../../lib/prisma";
 import { safeCallModel } from "../../lib/aiClient";
+import { getAuthenticatedUser } from "../../lib/auth";
 
 // Small filename -> mime heuristic for when file.type is empty in the FormData
 function mimeFromFilename(name: string) {
@@ -41,38 +41,16 @@ if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
 
 export async function GET(req: Request) {
   try {
-    // Authenticate user by reading jwt_token cookie from request headers
-    const cookieHeader = req.headers.get("cookie") || "";
-    const match = cookieHeader.match(/jwt_token=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : null;
-
-    if (!token) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-    let userId: string | null = null;
-    try {
-      const verified = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
-      const payload = verified.payload as { userId?: string };
-      userId = payload.userId || null;
-    } catch (e) {
-      console.error("Upload GET: JWT verification failed", e);
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    if (!userId) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const section = searchParams.get("section");
 
     const whereClause: { ownerId: string; section?: string } = {
-      ownerId: userId,
+      ownerId: user.id,
     };
     if (section) {
       whereClause.section = section;
@@ -97,27 +75,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    // Authenticate user by reading jwt_token cookie from request headers
-    const cookieHeader = req.headers.get("cookie") || "";
-    const match = cookieHeader.match(/jwt_token=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : null;
-
-    if (!token) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-    }
-
-    const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-    let userId: string | null = null;
-    try {
-      const verified = await jwtVerify(
-        token,
-        new TextEncoder().encode(JWT_SECRET)
-      );
-      const payload = verified.payload as { userId?: string };
-      userId = payload.userId || null;
-    } catch (e) {
-      console.error("Upload: JWT verification failed", e);
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
     const form = await req.formData();
     const file = form.get("file") as File | null;
@@ -259,10 +219,10 @@ export async function POST(req: Request) {
     let analysisResult: string | null = null;
     // Persist file metadata to Prisma
     try {
-      if (userId) {
+      if (user.id) {
         await prisma.file.create({
           data: {
-            ownerId: userId,
+            ownerId: user.id,
             filename: response.original_filename || "unknown",
             url: response.url || "",
             publicId: response.public_id,
@@ -308,7 +268,7 @@ export async function POST(req: Request) {
         if (analysisResult) {
           await prisma.analysisResult.create({
             data: {
-              userId: userId,
+              userId: user.id,
               task: "file-analysis",
               result: analysisResult,
               context: JSON.stringify({

@@ -1,46 +1,18 @@
 import { NextResponse } from "next/server";
-import { jwtVerify } from "jose";
 import { prisma } from "../../lib/prisma";
 import { safeCallModel } from "../../lib/aiClient";
-
-async function getUserFromToken(req: Request) {
-  const cookieHeader = req.headers.get("cookie") || "";
-  const match = cookieHeader.match(/jwt_token=([^;]+)/);
-  const token = match ? decodeURIComponent(match[1]) : null;
-
-  if (!token) {
-    return null;
-  }
-
-  const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-  try {
-    const verified = await jwtVerify(
-      token,
-      new TextEncoder().encode(JWT_SECRET)
-    );
-    const payload = verified.payload as { userId?: string };
-    return payload.userId || null;
-  } catch (e) {
-    console.error("Analytics: JWT verification failed", e);
-    return null;
-  }
-}
+import { getAuthenticatedUser } from "../../lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const userId = await getUserFromToken(req);
-    if (!userId) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { onboarding: true },
-    });
-
     const results = await prisma.analysisResult.findMany({
       where: {
-        userId: userId,
+        userId: user.id,
       },
       orderBy: {
         createdAt: "desc",
@@ -87,8 +59,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const userId = await getUserFromToken(req);
-    if (!userId) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -98,11 +70,6 @@ export async function POST(req: Request) {
     if (!query) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { onboarding: true },
-    });
 
     let prompt;
     if (query.startsWith("Analyze competitor:")) {

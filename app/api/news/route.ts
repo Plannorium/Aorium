@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { getAuthenticatedUser } from "../../lib/auth";
 
 export async function GET() {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return new NextResponse("Not authenticated", { status: 401 });
+  }
   const apiKey = process.env.MEDIASTACK_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

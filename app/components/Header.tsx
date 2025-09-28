@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { MenuIcon, XIcon, GlobeIcon, User, LogOut } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 const Header = () => {
@@ -12,23 +12,15 @@ const Header = () => {
   const [language, setLanguage] = useState("en");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session, status } = useSession();
   const router = useRouter();
   const profileRef = useRef<HTMLDivElement | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      setIsLoggedIn(false);
-      setIsProfileOpen(false);
-      router.push("/home");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    await signOut({ redirect: false });
+    setIsProfileOpen(false);
+    router.push("/home");
   };
 
   // Close profile dropdown when clicking outside
@@ -43,27 +35,6 @@ const Header = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    // Check authentication status
-    const checkAuthStatus = async () => {
-      try {
-        const response = await fetch("/api/auth/status", {
-          credentials: "include",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data.isAuthenticated);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch (error) {
-        console.error("Failed to check auth status:", error);
-        setIsLoggedIn(false);
-      }
-    };
-    checkAuthStatus();
   }, []);
 
   useEffect(() => {
@@ -173,7 +144,7 @@ const Header = () => {
             <GlobeIcon size={18} className="mr-1" />
             <span>{language === "en" ? "العربية" : "English"}</span>
           </button>
-          {isLoggedIn ? (
+          {status === 'authenticated' ? (
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen((s) => !s)}
@@ -185,7 +156,7 @@ const Header = () => {
                 <span className="sr-only">Open profile menu</span>
                 {/* simple avatar circle with initial */}
                 <span className="w-6 h-6 rounded-full bg-[#071A3a] text-[#D4AF37] flex items-center justify-center font-semibold">
-                  U
+                  {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </button>
 
@@ -255,7 +226,7 @@ const Header = () => {
               <GlobeIcon size={18} className="mr-1" />
               <span>{language === "en" ? "العربية" : "English"}</span>
             </button>
-            {isLoggedIn ? (
+            {status === 'authenticated' ? (
               <>
                 {authLinks.map((a) => (
                   <Link

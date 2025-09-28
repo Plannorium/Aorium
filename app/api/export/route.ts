@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import htmlToDocx from "html-to-docx";
+import { getAuthenticatedUser } from "../../lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return new NextResponse("Not authenticated", { status: 401 });
+    }
     const { htmlString } = await req.json();
 
     if (!htmlString) {

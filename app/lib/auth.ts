@@ -1,15 +1,20 @@
-import Cookies from "js-cookie";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import { prisma } from "./prisma";
 
-const TOKEN_KEY = "jwt_token";
+export { authOptions };
 
-export const setAuthToken = (token: string) => {
-  Cookies.set(TOKEN_KEY, token, { expires: 7 }); // Token expires in 7 days
-};
+export async function getAuthenticatedUser() {
+  const session = await getServerSession(authOptions);
 
-export const getAuthToken = (): string | undefined => {
-  return Cookies.get(TOKEN_KEY);
-};
+  if (!session?.user?.id) {
+    return null;
+  }
 
-export const removeAuthToken = () => {
-  Cookies.remove(TOKEN_KEY);
-};
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { onboarding: true },
+  });
+
+  return user;
+}

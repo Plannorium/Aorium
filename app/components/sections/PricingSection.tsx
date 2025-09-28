@@ -86,10 +86,10 @@ const PricingSection = () => {
         "Advanced security & compliance features",
       ],
       buttonText: "Contact Sales",
-      href: "/contact",
+      href: "https://calendly.com/team-plannorium_/aorium-demo",
       variant: "default",
     },
-  ];
+  ] as const;
 
   return (
     <section id="pricing" className="py-24 bg-primary-dark relative">

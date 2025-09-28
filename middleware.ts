@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("jwt_token")?.value;
+  // If the request is from the middleware itself, pass it through
+  if (request.headers.get("X-Middleware-Auth")) {
+    return NextResponse.next();
+  }
+
+  const token = await getToken({
+    req: request,
+    raw: true,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
   const { pathname } = request.nextUrl;
 
   if (
     pathname.startsWith("/auth") ||
-    pathname.startsWith("/api") ||
+    pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     // Allow requests for files in `public` (e.g. /Aorium.png) or other static assets
     // by letting any path that contains an extension (a dot) through.
@@ -26,14 +33,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  try {
-    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-  } catch (err) {
-    const response = NextResponse.redirect(new URL("/auth/login", request.url));
-    response.cookies.delete("jwt_token");
-    return response;
-  }
-
   // if we are on the onboarding page, we don't need to check for onboarding status
   if (pathname.startsWith("/onboarding")) {
     const onboardingResponse = await fetch(
@@ -41,6 +40,7 @@ export async function middleware(request: NextRequest) {
       {
         headers: {
           Authorization: `Bearer ${token}`,
+          "X-Middleware-Auth": "true",
         },
       }
     );
@@ -59,6 +59,7 @@ export async function middleware(request: NextRequest) {
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        "X-Middleware-Auth": "true",
       },
     }
   );
