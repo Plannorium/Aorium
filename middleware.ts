@@ -3,6 +3,12 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
   // If the request is from the middleware itself, pass it through
   if (request.headers.get("X-Middleware-Auth")) {
     return NextResponse.next();
@@ -13,7 +19,6 @@ export async function middleware(request: NextRequest) {
     raw: true,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  const { pathname } = request.nextUrl;
 
   if (
     pathname.startsWith("/auth") ||
@@ -27,7 +32,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    if (pathname === "/home") {
+    if (pathname === "/home" || pathname === "/features" || pathname === "/pricing") {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL("/auth/login", request.url));

@@ -120,14 +120,14 @@ export async function POST(req: Request) {
     } else if (query.startsWith("Analyze historical data")) {
       const fileCount = await prisma.file.count({
         where: {
-          ownerId: userId,
+          ownerId: user.id,
           section: "historicalPerformance",
         },
       });
 
       const files = await prisma.file.findMany({
         where: {
-          ownerId: userId,
+          ownerId: user.id,
           section: "historicalPerformance",
         },
         orderBy: {
@@ -165,15 +165,10 @@ export async function POST(req: Request) {
       }
 
       prompt = `
-        Provide a comprehensive business analysis for ${
-          user?.onboarding?.businessName || "the company"
+        Provide a comprehensive business analysis for ${user?.onboarding?.businessName || "the company"}
         },
-        a ${user?.onboarding?.businessType || ""} business of ${
-        user?.onboarding?.businessSize || ""
-      } size
-        operating in ${user?.onboarding?.region || ""}. Key goals include: ${
-        user?.onboarding?.goals.join(", ") || ""
-      }.
+        a ${user?.onboarding?.businessType || ""} business of ${user?.onboarding?.businessSize || ""} size
+        operating in ${user?.onboarding?.region || ""}. Key goals include: ${user?.onboarding?.goals.join(", ") || ""}.
 
         Analyze the following historical data:
         ${fileContents}

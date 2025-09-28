@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -12,6 +12,18 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errorMessage = searchParams.get("error");
+    if (errorMessage) {
+      if (errorMessage === 'CredentialsSignin') {
+        setError('Invalid email or password');
+      } else {
+        setError(errorMessage);
+      }
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +38,11 @@ const LoginPage = () => {
       });
 
       if (result?.error) {
-        setError(result.error);
+        if (result.error === 'CredentialsSignin') {
+          setError('Invalid email or password');
+        } else {
+          setError(result.error);
+        }
       } else {
         router.push("/dashboard");
       }

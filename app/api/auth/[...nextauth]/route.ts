@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 import { NextAuthOptions } from "next-auth";
 
@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email and password are required");
         }
 
         const user = await prisma.user.findUnique({
@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          return null;
+          throw new Error("Invalid email or password");
         }
 
         const isValid = await bcrypt.compare(
@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isValid) {
-          return null;
+          throw new Error("Invalid email or password");
         }
 
         return user;

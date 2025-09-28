@@ -27,7 +27,7 @@ const RegisterPage = () => {
       });
 
       if (res.ok) {
-        router.push("/auth/login?registration=success");
+        router.push(`/auth/otp-verify?email=${email}`);
       } else {
         const errorData = await res.json();
         setError(errorData.error || "Registration failed. Please try again.");
