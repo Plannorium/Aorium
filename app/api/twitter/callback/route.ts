@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     const client = new TwitterApi({
       clientId: process.env.TWITTER_CLIENT_ID!,
-      clientSecret: process.env.TWITTER_API_KEY_SECRET!,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
     });
 
     const { accessToken, refreshToken, expiresIn } =

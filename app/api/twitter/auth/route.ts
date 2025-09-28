@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   try {
     const client = new TwitterApi({
       clientId: process.env.TWITTER_CLIENT_ID!,
-      clientSecret: process.env.TWITTER_API_KEY_SECRET!,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
     });
 
     const { url, codeVerifier, state } = client.generateOAuth2AuthLink(
